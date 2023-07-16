@@ -1,13 +1,19 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_DEPRECATE
+
+
 #include "DrawManager.h"
 #include <math.h>
 #include <memory.h>
 #include <stdlib.h>
+#include <iostream>
+
 
 double pi = 3.1415;
 double eps = 0.00001;
 
-color::color(char b = 255, char g = 255, char r = 255, char a = 255)
-    : b(b), g(g), r(r), a(a) {};
+color::color(unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255)
+    : r(r), g(g), b(b), a(a) {};
 
 
 color Colors::bgc = color(100, 164, 225, 255);
@@ -21,11 +27,10 @@ color Colors::defoult = color(225, 0, 0, 255);
 uint32_t uint32_from_color(color c) {
     uint32_t color;
     uint32_t* point = &color;
-    char* r_ptr = (char*)point;
-    char* g_ptr = (char*)point + 1;
-    char* b_ptr = (char*)point + 2;
-    char* a_ptr = (char*)point + 3;
-    //   char *b_ptr = static_cast<char*>(point);
+    unsigned char* r_ptr = (unsigned char*)point + 2;
+    unsigned char* g_ptr = (unsigned char*)point + 1;
+    unsigned char* b_ptr = (unsigned char*)point + 0;
+    unsigned char* a_ptr = (unsigned char*)point + 3;
     *r_ptr = c.r;
     *g_ptr = c.g;
     *b_ptr = c.b;
@@ -34,28 +39,59 @@ uint32_t uint32_from_color(color c) {
 }
 
 
-char add_channel_with_alpha(char back, char front, char alpha) {
-    return front * (float(alpha) / 255) + back * (1.0f - float(alpha) / 255);
+
+color color_from_uint32(uint32_t pixel_color) {
+    color c;
+    uint32_t* point = &pixel_color;
+    unsigned char* r_ptr = (unsigned char*)point + 2;
+    unsigned char* g_ptr = (unsigned char*)point + 1;
+    unsigned char* b_ptr = (unsigned char*)point + 0;
+    unsigned char* a_ptr = (unsigned char*)point + 3;
+    c.r = *r_ptr;
+    c.g = *g_ptr;
+    c.b = *b_ptr;
+    c.a = *a_ptr;
+    return c;
+}
+
+// mesh between back_color to front_color using t value where t=0 means back_color and t=1 means front_color 
+color mesh_colors(color start_color, color end_color, double t) {
+    if (t <= 0) {
+        return start_color;
+    }
+    if (t >= 1) {
+        return end_color;
+    }
+    color c(
+        unsigned char((double(start_color.r) * (1 - t)) + (double(end_color.r) * t)),
+        unsigned char((double(start_color.g) * (1 - t)) + (double(end_color.g) * t)),
+        unsigned char((double(start_color.b) * (1 - t)) + (double(end_color.b) * t)),
+        unsigned char((double(start_color.a) * (1 - t)) + (double(end_color.a) * t)));
+    return c;
 }
 
 
 // add back_color to front_color using alpha channel
-color mesh_colors(color back_color, color front_color, double t) {
-    color color(
-        add_channel_with_alpha(back_color.r, front_color.r, back_color.a),
-        add_channel_with_alpha(back_color.g, front_color.g, back_color.a),
-        add_channel_with_alpha(back_color.b, front_color.b, back_color.a),
-        back_color.a);
-    return color;
+color add_colors(color back_color, color front_color) {
+    color c = mesh_colors(front_color, back_color, double(front_color.a) / 255.0);
+    return c;
 }
 
 
 void set_pixel_color(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
-    color color = Colors::defoult) {
-    uint32_t pixel_color = uint32_from_color(color);
-    // char* a_ptr = (char*)&color + 3;
-    if (y >= 0 && x >= 0 && y < SCREEN_HEIGHT && x < SCREEN_WIDTH)
-        buffer[y][x] = pixel_color;
+    color c = Colors::defoult) {
+    uint32_t pixel_color = uint32_from_color(c);
+
+    if (y >= 0 && x >= 0 && y < SCREEN_HEIGHT && x < SCREEN_WIDTH) {
+        if (c.a == 255) {
+            buffer[y][x] = pixel_color;
+        } 
+        else {
+            color new_color = add_colors(color_from_uint32(buffer[y][x]), c);
+            new_color.a = 255;
+            buffer[y][x] = uint32_from_color(new_color);
+        }
+    }  
 }
 
 
@@ -133,4 +169,23 @@ void draw_circle(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
 void draw_circle(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel p, int r,
     color color = Colors::defoult) {
     draw_circle(buffer, p.x, p.y, r, color);
+}
+
+// draw filled circle at (x, y) p with radius r and color
+void draw_circle_fill(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x,
+    int y, int r, color color = Colors::defoult) {
+
+    for (int dx = x - r; dx <= x + r; dx++) {
+        for (int dy = y - r; dy <= y + r; dy++) {
+            if ((dx - x) * (dx - x) + (dy - y) * (dy - y) <= r * r) {
+                set_pixel_color(buffer, dx, dy, color);
+            }
+        }
+    }
+}
+
+// draw filled circle at pixel p with radius r and color
+void draw_circle_fill(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel p,
+    int r, color color = Colors::defoult) {
+    draw_circle_fill(buffer, p.x, p.y, r, color);
 }
