@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_DEPRECATE
-
+#define _USE_MATH_DEFINES
 
 #include "DrawManager.h"
 #include <math.h>
@@ -8,9 +8,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-
-double pi = 3.1415;
-double eps = 0.00001;
+double eps = 0.0001;
 
 color::color(unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255)
     : r(r), g(g), b(b), a(a) {};
@@ -73,11 +71,13 @@ color mesh_colors(color start_color, color end_color, double t) {
 
 // add back_color to front_color using alpha channel
 color add_colors(color back_color, color front_color) {
+    // adding colors just uses alpha of the 
     color c = mesh_colors(front_color, back_color, double(front_color.a) / 255.0);
+    c.a = unsigned char(double(255 - back_color.a) * double(255 - back_color.a) / 255.0);
     return c;
 }
 
-
+// sets pixel on the buffer to the chosen color
 void set_pixel_color(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
     color c = Colors::defoult) {
     uint32_t pixel_color = uint32_from_color(c);
@@ -93,7 +93,6 @@ void set_pixel_color(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
         }
     }  
 }
-
 
 // draw staight line from (x0, y0) to (x1, y1)
 void draw_line(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x0, int y0,
@@ -158,7 +157,7 @@ void draw_line(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel a, pixel b,
 // draw circle at (x, y) with radius r and color
 void draw_circle(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
     int r, color color = Colors::defoult) {
-    for (double a = 0; a <= 2 * pi; a += 1 / (2 * pi * double(r))) {
+    for (double a = 0; a <= 2 * M_PI; a += 1 / (2 * M_PI * double(r))) {
         int endx = int(double(r) * cos(a));
         int endy = int(double(r) * sin(a));
         set_pixel_color(buffer, x + endx, y + endy, color);
@@ -188,4 +187,42 @@ void draw_circle_fill(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x,
 void draw_circle_fill(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel p,
     int r, color color = Colors::defoult) {
     draw_circle_fill(buffer, p.x, p.y, r, color);
+}
+
+// draw circle segment at (x, y) with radius r and color that starts at angle from and ends at to.
+void draw_circle_segment(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x,
+    int y, int r, double from = 0, double to = 2 * M_PI,
+    color color = Colors::defoult) {
+    // this algorithm iterates through angles from from to to
+    // in angles such iteration only makes sence if we are going from from
+    // clockwise until we reach first from at 2pi period because of that angles
+    // are downscaled to 0 to 2pi and 0 to 4 pi respectively
+
+    // TODO: get rid of while's
+    while (to < from) {
+        to += M_PI * 2;
+    }
+
+    while (to > from + M_PI * 2 + eps) {
+        to -= M_PI * 2;
+    }
+
+    if (to - from < eps) {
+        return;
+    }
+
+    for (double a = from; a <= to; a += 1 / (2 * M_PI * double(r))) {
+        int endx = int(double(r) * cos(a));
+        int endy = int(double(r) * sin(a));
+        
+        set_pixel_color(buffer, x + endx, y + endy, color);
+    }
+}
+
+// draw circle segment at pixel p with radius r and color that starts at angle
+// from and ends at to
+void draw_circle_segment(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel p,
+    int r, double from = 0, double to = 2 * M_PI,
+    color color = Colors::defoult) {
+    draw_circle_segment(buffer, p.x, p.y, r, from, to, color);
 }

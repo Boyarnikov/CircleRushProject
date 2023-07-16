@@ -1,7 +1,10 @@
+#define _USE_MATH_DEFINES
+
 #include "Engine.h"
 #include "DrawManager.h"
 #include <stdlib.h>
 #include <memory.h>
+#include <math.h>
 
 
 double time = 0;
@@ -22,19 +25,22 @@ void act(float dt)
 }
 
 void draw_test_scene() {
-    for (uint32_t i = 0; i < SCREEN_HEIGHT; i++)
-        for (uint32_t j = 0; j < SCREEN_WIDTH; j++)
+    for (uint32_t i = 150; i < 350; i++)
+        for (uint32_t j = 50; j < 250; j++)
         {
             if (i%6 < 3 && j % 6 < 3)
             set_pixel_color(buffer, j, i, color(255, 255, 255, 255));
         }
 
+    for (uint32_t i = 0; i < 100; i+=10)
+        draw_line(buffer, 50, 50, 150, 50 + i, Colors::blue);
 
+    for (uint32_t i = 0; i < 100; i += 10)
+        draw_circle(buffer, 400, 150, 10 + i, color(255, 0, 0, 255));
 
-    //draw_circle(buffer, 20, 20, 10, color(255, 0, 0, 255));
-    //draw_line(buffer, 10, 20, 30, 40, Colors::blue);
-
-
+    for (uint32_t i = 0; i < 100; i += 10)
+        draw_circle_segment(buffer, 400, 350, 10 + i, i, i + M_PI, color(i, 255-i, 255, 255));
+    
     draw_circle_fill(buffer, 100, 200, 50, color(255, 0, 0, 100));
     draw_circle_fill(buffer, 150, 200, 50, color(0, 255, 0, 100));
     draw_circle_fill(buffer, 125, 225, 50, color(0, 0, 255, 100));
