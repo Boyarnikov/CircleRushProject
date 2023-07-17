@@ -2,16 +2,22 @@
 
 #include "Engine.h"
 #include "DrawManager.h"
+#include "BMPManager.h"
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
+#include <vector>
 
+using namespace draw_manager;
 
 double time = 0;
+std::vector<std::vector<int>> font;
 
 // initialize game data in this function
 void initialize()
 {
+    // TODO: create a font_init() and deligate file choice to it
+    font = bmp::readBitmap("numbers.bmp");
 }
 
 // this function is called to update game data,
@@ -25,6 +31,9 @@ void act(float dt)
 }
 
 void draw_test_scene() {
+    fill_with_color(buffer, color(100, 100, 100, 255));
+
+
     for (uint32_t i = 150; i < 350; i++)
         for (uint32_t j = 50; j < 250; j++)
         {
@@ -39,13 +48,34 @@ void draw_test_scene() {
         draw_circle(buffer, 400, 150, 10 + i, color(255, 0, 0, 255));
 
     for (uint32_t i = 0; i < 100; i += 10)
-        draw_circle_segment(buffer, 400, 350, 10 + i, i, i + M_PI, color(i, 255-i, 255, 255));
+        draw_circle_segment(buffer, 400, 375, 10 + i, i + time, i + M_PI + time, color(i, 255-i, 255, 255));
     
     draw_circle_fill(buffer, 100, 200, 50, color(255, 0, 0, 100));
     draw_circle_fill(buffer, 150, 200, 50, color(0, 255, 0, 100));
     draw_circle_fill(buffer, 125, 225, 50, color(0, 0, 255, 100));
 
-    //draw_circle_fill(buffer, 500, 200, 50, mesh_colors(color(255, 255, 255, 255), color(255, 0, 0, 255), time / 10));
+    pixel p[10];
+
+    for (size_t k = 3; k < 10; k++)
+    {
+        for (size_t j = 0; j < k; j++)
+        {
+            double i = double(j) / k * 2 * M_PI;
+            p[j].x = int(10. * k * cos(i)) + 200;
+            p[j].y = int(10. * k * sin(i)) + 500;
+        }
+        draw_polygon(buffer, p, k, Colors::green);
+    }
+
+    
+    if (is_mouse_button_pressed(0)) {
+        draw_circle_fill(buffer, get_cursor_x(), get_cursor_y(), 20, color(255, 255, 255, 100));
+    }
+    else {
+        draw_circle_fill(buffer, get_cursor_x(), get_cursor_y(), 10, color(255, 255, 255, 100));
+    }
+
+    draw_int(buffer, font, 600, 100, int(time), 1.0, Colors::defoult);
 }
 
 
