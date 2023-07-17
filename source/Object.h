@@ -22,7 +22,7 @@ public:
 	const tfm::transform get_transform();
 	void set_transform(tfm::transform);
 	virtual void act(data_time);
-	void draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], double time);
+	virtual void draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], data_time);
 	
 };
 

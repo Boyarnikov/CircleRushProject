@@ -90,7 +90,7 @@ namespace draw_manager {
         uint32_t pixel_color = uint32_from_color(c);
 
         if (y >= 0 && x >= 0 && y < SCREEN_HEIGHT && x < SCREEN_WIDTH) {
-            if (c.a == 255) {
+            if (c.a > 250) {
                 buffer[y][x] = pixel_color;
             } 
             else {

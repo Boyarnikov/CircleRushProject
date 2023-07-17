@@ -40,7 +40,7 @@ void object::debug_draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH]) {
 	}
 }
 
-void object::draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], double time) {
+void object::draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], data_time data_time) {
 	debug_draw(buffer);
 	return;
 }

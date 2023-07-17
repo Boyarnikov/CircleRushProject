@@ -4,6 +4,7 @@
 #include "DrawManager.h"
 #include "SpriteManager.h"
 #include "MovingObject.h"
+#include "PlayerControl.h"
 #include "Object.h"
 #include "TimeManager.h"
 #include <stdlib.h>
@@ -15,16 +16,10 @@
 
 using namespace draw_manager;
 
-double global_time = 0;
+data_time data_t;
 spr::sprite font = spr::sprite();
 
 std::vector<std::unique_ptr<object>> object_pull;
-
-object m3 = moving_object(data_time{0, 0},
-    tfm::transform(tfm::point(200, 300), 0.),
-    tfm::transform(tfm::point(50, 0), 1.),
-    Tags::None);
-
 
 
 // initialize game data in this function
@@ -32,21 +27,27 @@ void initialize()
 {
     font = spr::sprite("numbers.bmp", 64, 64);
 
-    data_time data_time{ 0, 0 };
+    data_t = { 0, 0 };
+
+    object_pull.push_back(
+        std::unique_ptr<object>(
+            new player_object(data_t, tfm::transform(tfm::point(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)))
+        )
+    );
     
     object_pull.push_back(
-        std::unique_ptr<object>(new moving_object(data_time,
+        std::unique_ptr<object>(new moving_object(data_t,
             tfm::transform(tfm::point(200, 300), 0.),
             tfm::transform(tfm::point(50, 0), 1.)))
     );
 
-    moving_object(data_time,
+    moving_object(data_t,
         tfm::transform(tfm::point(100, 300), 0.),
         tfm::transform(tfm::point(50, 0), 3.));
     
     object_pull.push_back(
         std::unique_ptr<object>(
-            new moving_object(data_time,
+            new moving_object(data_t,
             tfm::transform(tfm::point(100, 300), 0.),
             tfm::transform(tfm::point(50, 0), 3.))
             
@@ -54,7 +55,7 @@ void initialize()
     );
     object_pull.push_back(
         std::unique_ptr<object>(
-            new object(data_time,
+            new object(data_t,
                 tfm::transform(
                     tfm::point(100, 200),
                     100)
@@ -64,24 +65,20 @@ void initialize()
 }
 
 
-
 // this function is called to update game data,
 // dt - time elapsed since the previous update (in seconds)
 void act(float dt)
 {
-    data_time data_time{ global_time, dt };
-    global_time += dt;
+    data_t.time += dt;
+    data_t.dt = dt;
 
     if (is_key_pressed(VK_ESCAPE))
         schedule_quit_game();
 
     for (size_t i = 0; i < object_pull.size(); i++)
     {
-        object_pull[i]->act(data_time);
+        object_pull[i]->act(data_t);
     }
-    m3.act(data_time);
-
-    
 }
 
 void draw_test_scene() {
@@ -102,7 +99,7 @@ void draw_test_scene() {
         draw_circle(buffer, 400, 150, 10 + i, color(255, 0, 0, 255));
 
     for (uint32_t i = 0; i < 100; i += 10)
-        draw_circle_segment(buffer, 400, 375, 10 + i, i + global_time, i + M_PI + global_time, color(i, 255-i, 255, 255));
+        draw_circle_segment(buffer, 400, 375, 10 + i, i + data_t.time, i + M_PI + data_t.time, color(i, 255-i, 255, 255));
     
     draw_circle_fill(buffer, 100, 200, 50, color(255, 0, 0, 100));
     draw_circle_fill(buffer, 150, 200, 50, color(0, 255, 0, 100));
@@ -129,7 +126,7 @@ void draw_test_scene() {
         draw_circle_fill(buffer, get_cursor_x(), get_cursor_y(), 10, color(255, 255, 255, 100));
     }
 
-    draw_int(buffer, font, 600, 100, int(global_time), 1.0, Colors::defoult);
+    draw_int(buffer, font, 600, 100, int(data_t.time), 1.0, Colors::defoult);
 }
 
 
@@ -137,15 +134,21 @@ void draw_test_scene() {
 // uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH] - is an array of 32-bit colors (8 bits per R, G, B)
 void draw()
 {
-    // clear backbuffer
     memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
-    //draw_test_scene();
+    //fill_with_color(buffer, Colors::bgc);
+
+    for (size_t y = 0; y < SCREEN_HEIGHT; y++)
+    {
+        for (size_t x = 0; x < SCREEN_WIDTH; x++)
+        {
+            set_pixel_color(buffer, x, y, Colors::bgc);
+        }
+    }
 
     for (size_t i = 0; i < object_pull.size(); i++)
     {
-        object_pull[i]->draw(buffer, global_time);
+        object_pull[i]->draw(buffer, data_t);
     }
-    m3.draw(buffer, global_time);
 }
 
 

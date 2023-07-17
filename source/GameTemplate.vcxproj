@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="MovingObject.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="PlayerControl.h" />
     <ClInclude Include="SpriteManager.h" />
     <ClInclude Include="DrawManager.h" />
     <ClInclude Include="Engine.h" />
@@ -155,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="MovingObject.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="PlayerControl.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="DrawManager.cpp" />
     <ClCompile Include="Engine.cpp" />
