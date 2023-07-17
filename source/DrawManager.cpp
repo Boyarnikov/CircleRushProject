@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 
 #include "DrawManager.h"
-#include "BMPManager.h"
+#include "SpriteManager.h"
 #include <math.h>
 #include <memory.h>
 #include <stdlib.h>
@@ -286,31 +286,30 @@ namespace draw_manager {
         unsigned char* pixels;
     };
 
-    // draws number on screen
-    // TODO: migrate it to sprite based drawing
-    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], std::vector<std::vector<int>> font,
+
+    // draws number on screen. uses sprite as mask, and draw color where the mask is full white
+    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font,
         int x, int y, int n, color color) {
-        if (n < 0 || n>9) return;
-        int dx = n * 64;
+        if (n < 0 || n > 9) return;
+        int dx = n * font.spr_width;
         int dy = 0;
 
-        for (size_t i = 0; i < 64; i++)
+        for (size_t i = 0; i < font.spr_width; i++)
         {
-            for (size_t j = 0; j < 64; j++)
+            for (size_t j = 0; j < font.spr_height; j++)
             {
-                int p = font[j + dy][i + dx];
+                int p = font.pixels[j + dy][i + dx];
                 unsigned char* point = (unsigned char*)&p;
                 //set_pixel_color(buffer, i + x - 32, j + y - 32, get_color_from_RGBA(point[0] == 255, point[1] == 255, point[2] == 255, point[3] == 255));
                 if (!(point[0] == 255 && point[1] == 255 && point[2] == 255))
-                    set_pixel_color(buffer, i + x - 32, j + y - 32, color);
+                    set_pixel_color(buffer, i + x - font.spr_width / 2., j + y - font.spr_height / 2., color = Colors::defoult);
             }
         }
     }
 
-    // draws positive integer on screen
-    // TODO: migrate it to sprite based drawing
-    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], std::vector<std::vector<int>> font,
-        int x, int y, int n, double scale, color color) {
+    // draws positive integer on screen, scale value gives padding between numbers
+    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font,
+        int x, int y, int n, double scale = 0.67, color color = Colors::defoult) {
         int num_size = 0;
         int num = n;
 
@@ -325,7 +324,11 @@ namespace draw_manager {
         num = n;
         for (size_t i = 0; i < num_size; i++)
         {
-            draw_number(buffer, font, x + (num_size - 1) * 22 * scale - i * 44 * scale, y - 32 * scale, num % 10, color);
+            // NOTE probably should make a sprite-mask function and just draw a sprite frame
+            draw_number(buffer, font,
+                x + (num_size - 1) * font.spr_width * scale / 2. - i * font.spr_width * scale / 2.,
+                y - font.spr_height / 2.,
+                num % 10, color);
             num /= 10;
         }
     }

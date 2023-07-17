@@ -2,7 +2,7 @@
 
 #include "Engine.h"
 #include "DrawManager.h"
-#include "BMPManager.h"
+#include "SpriteManager.h"
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
@@ -11,13 +11,13 @@
 using namespace draw_manager;
 
 double time = 0;
-std::vector<std::vector<int>> font;
+spr::sprite font = spr::sprite();
 
 // initialize game data in this function
 void initialize()
 {
     // TODO: create a font_init() and deligate file choice to it
-    font = bmp::readBitmap("numbers.bmp");
+    font = spr::sprite("numbers.bmp", 64, 64);
 }
 
 // this function is called to update game data,
