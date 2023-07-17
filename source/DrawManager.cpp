@@ -63,6 +63,7 @@ namespace draw_manager {
         if (t >= 1) {
             return end_color;
         }
+        // NOTE: this function really begs for some optimisation. it's really bad performance-vise especialy when called many times for each pixel
         color c(
             unsigned char((double(start_color.r) * (1 - t)) + (double(end_color.r) * t)),
             unsigned char((double(start_color.g) * (1 - t)) + (double(end_color.g) * t)),
@@ -119,6 +120,8 @@ namespace draw_manager {
         }
     }
 
+    // NOTE: it really looks like this kind of function could benefit from batch-filling the values instead of filling it pixel by pixel
+    //       however it feels like alpha channel cannot be optimised taht way. Maybe create a function just to fill background?
     // fill whole buffer with plane color
     void fill_with_color(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], color color = Colors::defoult) {
         for (size_t y = 0; y < SCREEN_HEIGHT; y++)
