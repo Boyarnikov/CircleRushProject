@@ -30,13 +30,13 @@ void object::act(data_time data_time) {
 void object::debug_draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH]) {
 	if (is_key_pressed('W')) {
 		draw_manager::pixel pos(obj_transform.position.x, obj_transform.position.y);
-		double len = 50;
+		double len = 50 * obj_transform.scale;
 		draw_manager::pixel x(obj_transform.position.x + len * cos(obj_transform.rotation),
 			obj_transform.position.y + len * sin(obj_transform.rotation));
 		draw_manager::pixel y(obj_transform.position.x + len * cos(obj_transform.rotation - M_PI / 2),
 			obj_transform.position.y + len * sin(obj_transform.rotation - M_PI / 2));
-		draw_manager::draw_line(buffer, pos, x, draw_manager::Colors::blue);
-		draw_manager::draw_line(buffer, pos, y, draw_manager::Colors::green);
+		draw_manager::draw_line(buffer, pos, x, draw_manager::Colors::defoult);
+		draw_manager::draw_line(buffer, pos, y, draw_manager::Colors::defoult);
 	}
 }
 

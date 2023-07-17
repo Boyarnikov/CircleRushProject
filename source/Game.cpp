@@ -17,7 +17,8 @@
 using namespace draw_manager;
 
 data_time data_t;
-spr::sprite font = spr::sprite();
+int dt_count = 1;
+
 
 std::vector<std::unique_ptr<object>> object_pull;
 
@@ -25,7 +26,7 @@ std::vector<std::unique_ptr<object>> object_pull;
 // initialize game data in this function
 void initialize()
 {
-    font = spr::sprite("numbers.bmp", 64, 64);
+    init_font();
 
     data_t = { 0, 0 };
 
@@ -69,6 +70,7 @@ void initialize()
 // dt - time elapsed since the previous update (in seconds)
 void act(float dt)
 {
+    dt_count++;
     data_t.time += dt;
     data_t.dt = dt;
 
@@ -83,7 +85,6 @@ void act(float dt)
 
 void draw_test_scene() {
     fill_with_color(buffer, color(100, 100, 100, 255));
-
 
     for (uint32_t i = 150; i < 350; i++)
         for (uint32_t j = 50; j < 250; j++)
@@ -126,7 +127,7 @@ void draw_test_scene() {
         draw_circle_fill(buffer, get_cursor_x(), get_cursor_y(), 10, color(255, 255, 255, 100));
     }
 
-    draw_int(buffer, font, 600, 100, int(data_t.time), 1.0, Colors::defoult);
+    draw_int(buffer, 600, 100, int(data_t.time), Colors::defoult);
 }
 
 
@@ -135,20 +136,19 @@ void draw_test_scene() {
 void draw()
 {
     memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
-    //fill_with_color(buffer, Colors::bgc);
+    fill_with_color(buffer, Colors::bgc);
 
-    for (size_t y = 0; y < SCREEN_HEIGHT; y++)
-    {
-        for (size_t x = 0; x < SCREEN_WIDTH; x++)
-        {
-            set_pixel_color(buffer, x, y, Colors::bgc);
-        }
-    }
+    //draw_test_scene();
 
     for (size_t i = 0; i < object_pull.size(); i++)
     {
         object_pull[i]->draw(buffer, data_t);
     }
+
+    if (is_key_pressed('W')) {
+        draw_int(buffer, 100, 100, int(1. / (data_t.time / dt_count)), Colors::defoult);
+    }
+    
 }
 
 

@@ -48,6 +48,8 @@ namespace draw_manager {
     void draw_circle_segment(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y, int r, double from, double to, color);
     void draw_circle_segment(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel, int r, double from, double to, color);
     void draw_polygon(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel*, int, color);
-    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font, int x, int y, int n, color);
-    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font, int x, int y, int n, double scale, color);
+
+    void init_font();
+    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH],int x, int y, int n, color);
+    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y, int n, color);
 }
