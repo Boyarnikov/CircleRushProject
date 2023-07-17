@@ -13,6 +13,9 @@
 
 namespace draw_manager {
     double eps = 0.0001;
+    
+    pixel::pixel(int x, int y) : x(x), y(y) {};
+    pixel::pixel() : x(0), y(0) {};
 
     color::color(unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255)
         : r(r), g(g), b(b), a(a) {};

@@ -6,6 +6,8 @@ namespace draw_manager {
     struct pixel {
         int x = 0;
         int y = 0;
+        pixel(int, int);
+        pixel();
     };
 
     // color class with RGBA
