@@ -7,8 +7,8 @@
 
 object::object(double time) : creation_time(time), obj_transform(tfm::transform()), active(true) {};
 object::object(double time, tfm::transform t) : creation_time(time), obj_transform(t), active(true) {};
-object::object(double time, std::string s) : creation_time(time), obj_transform(tfm::transform()), active(true), tag(s) {};
-object::object(double time, tfm::transform t, std::string s) : creation_time(time), obj_transform(t), active(true), tag(s) {};
+object::object(double time, Tags s) : creation_time(time), obj_transform(tfm::transform()), active(true), tag(s) {};
+object::object(double time, tfm::transform t, Tags s) : creation_time(time), obj_transform(t), active(true), tag(s) {};
 
 bool object::is_active() {
 	return active;
@@ -19,14 +19,17 @@ const tfm::transform object::get_transform() {
 }
 
 void object::act(double time, double dt) {
-	obj_transform.position.x += dt * 1;
 	return;
+}
+
+void object::set_transform(tfm::transform t) {
+	obj_transform = t;
 }
 
 void object::draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], double time) {
 	if (is_key_pressed('W')) {
 		draw_manager::pixel pos(obj_transform.position.x, obj_transform.position.y);
-		double len = 10;
+		double len = 50;
 		draw_manager::pixel x(obj_transform.position.x + len * cos(obj_transform.rotation),
 			obj_transform.position.y + len * sin(obj_transform.rotation));
 		draw_manager::pixel y(obj_transform.position.x + len * cos(obj_transform.rotation - M_PI / 2),

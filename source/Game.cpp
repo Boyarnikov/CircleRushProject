@@ -22,7 +22,7 @@ std::vector<std::unique_ptr<object>> object_pull;
 object m3 = moving_object(global_time,
     tfm::transform(tfm::point(200, 300), 0.),
     tfm::transform(tfm::point(50, 0), 1.),
-    "None");
+    Tags::None);
 
 
 
@@ -33,16 +33,19 @@ void initialize()
     object_pull.push_back(
         std::unique_ptr<object>(new moving_object(global_time,
             tfm::transform(tfm::point(200, 300), 0.),
-            tfm::transform(tfm::point(50, 0), 1.),
-            "None"))
+            tfm::transform(tfm::point(50, 0), 1.)))
     );
+
+    moving_object(global_time,
+        tfm::transform(tfm::point(100, 300), 0.),
+        tfm::transform(tfm::point(50, 0), 3.));
     
     object_pull.push_back(
         std::unique_ptr<object>(
             new moving_object(global_time,
             tfm::transform(tfm::point(100, 300), 0.),
-            tfm::transform(tfm::point(50, 0), 3.),
-            "None")
+            tfm::transform(tfm::point(50, 0), 3.))
+            
         )
     );
     object_pull.push_back(
