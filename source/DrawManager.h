@@ -18,7 +18,7 @@ namespace draw_manager {
         color(unsigned char, unsigned char, unsigned char, unsigned char);
     };
 
-
+    // basic colors for game
     class Colors {
     public:
         static color bgc;
@@ -28,6 +28,7 @@ namespace draw_manager {
         static color white;
         static color defoult;
     };
+
 
     uint32_t uint32_from_color(color c);
     color add_colors(color, color);
