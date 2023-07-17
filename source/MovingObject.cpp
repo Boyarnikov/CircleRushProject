@@ -1,18 +1,29 @@
 #include "MovingObject.h"
+#include "TimeManager.h"
 #include <iostream>
 
-moving_object::moving_object(double time, tfm::transform t, tfm::transform dt = tfm::transform(), Tags s = Tags::None) : object(time, t, s), transform_dt(dt) {};
-moving_object::moving_object(double time, tfm::transform t, tfm::transform dt = tfm::transform()) : object(time, t), transform_dt(dt) {};
-moving_object::moving_object(double time, tfm::transform t, Tags s = Tags::None) : object(time, t, s), transform_dt() {};
-moving_object::moving_object(double time, tfm::transform t) : object(time, t), transform_dt() {};
-moving_object::moving_object(double time, Tags s = Tags::None) : object(time, s), transform_dt() {};
-moving_object::moving_object(double time) : object(time), transform_dt() {};
+
+moving_object::moving_object(data_time time, tfm::transform t, tfm::transform dt = tfm::transform(), Tags s = Tags::None) : object(time, t, s), transform_dt(dt) {};
+moving_object::moving_object(data_time time, tfm::transform t, tfm::transform dt = tfm::transform()) : object(time, t), transform_dt(dt) {};
+moving_object::moving_object(data_time time, tfm::transform t, Tags s = Tags::None) : object(time, t, s), transform_dt() {};
+moving_object::moving_object(data_time time, tfm::transform t) : object(time, t), transform_dt() {};
+moving_object::moving_object(data_time time, Tags s = Tags::None) : object(time, s), transform_dt() {};
+moving_object::moving_object(data_time time) : object(time), transform_dt() {};
 
 
-void moving_object::act(double time, double dt) {
-	object::act(time, dt);
-	obj_transform.position.x += dt * transform_dt.position.x;
-	obj_transform.position.y += dt * transform_dt.position.y;
-	obj_transform.rotation += dt * transform_dt.rotation;
-	obj_transform.scale += dt * transform_dt.scale;
+void moving_object::act(data_time data_time) {
+	object::act(data_time);
+	obj_transform.position.x += data_time.dt * transform_dt.position.x;
+	obj_transform.position.y += data_time.dt * transform_dt.position.y;
+	obj_transform.rotation += data_time.dt * transform_dt.rotation;
+	obj_transform.scale += data_time.dt * transform_dt.scale;
+}
+
+
+const tfm::transform moving_object::get_transform_dt() {
+	return transform_dt;
+}
+
+void moving_object::set_transform_dt(tfm::transform t) {
+	transform_dt = t;
 }

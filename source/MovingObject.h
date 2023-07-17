@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "TimeManager.h"
 
 class moving_object :
     public object
@@ -7,12 +8,15 @@ class moving_object :
 private: 
     tfm::transform transform_dt;
 public:
-    void act(double time, double df) override;
-    moving_object(double time, tfm::transform, tfm::transform, Tags);
-    moving_object(double time, tfm::transform, tfm::transform);
-    moving_object(double time, tfm::transform, Tags);
-    moving_object(double time, tfm::transform);
-    moving_object(double time, Tags);
-    moving_object(double time);
+    void act(data_time) override;
+    moving_object(data_time, tfm::transform, tfm::transform, Tags);
+    moving_object(data_time, tfm::transform, tfm::transform);
+    moving_object(data_time, tfm::transform, Tags);
+    moving_object(data_time, tfm::transform);
+    moving_object(data_time, Tags);
+    moving_object(data_time);
+
+    const tfm::transform get_transform_dt();
+    void set_transform_dt(tfm::transform);
 };
 

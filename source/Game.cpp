@@ -5,6 +5,7 @@
 #include "SpriteManager.h"
 #include "MovingObject.h"
 #include "Object.h"
+#include "TimeManager.h"
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
@@ -19,7 +20,7 @@ spr::sprite font = spr::sprite();
 
 std::vector<std::unique_ptr<object>> object_pull;
 
-object m3 = moving_object(global_time,
+object m3 = moving_object(data_time{0, 0},
     tfm::transform(tfm::point(200, 300), 0.),
     tfm::transform(tfm::point(50, 0), 1.),
     Tags::None);
@@ -30,19 +31,22 @@ object m3 = moving_object(global_time,
 void initialize()
 {
     font = spr::sprite("numbers.bmp", 64, 64);
+
+    data_time data_time{ 0, 0 };
+    
     object_pull.push_back(
-        std::unique_ptr<object>(new moving_object(global_time,
+        std::unique_ptr<object>(new moving_object(data_time,
             tfm::transform(tfm::point(200, 300), 0.),
             tfm::transform(tfm::point(50, 0), 1.)))
     );
 
-    moving_object(global_time,
+    moving_object(data_time,
         tfm::transform(tfm::point(100, 300), 0.),
         tfm::transform(tfm::point(50, 0), 3.));
     
     object_pull.push_back(
         std::unique_ptr<object>(
-            new moving_object(global_time,
+            new moving_object(data_time,
             tfm::transform(tfm::point(100, 300), 0.),
             tfm::transform(tfm::point(50, 0), 3.))
             
@@ -50,7 +54,7 @@ void initialize()
     );
     object_pull.push_back(
         std::unique_ptr<object>(
-            new object(global_time,
+            new object(data_time,
                 tfm::transform(
                     tfm::point(100, 200),
                     100)
@@ -65,6 +69,7 @@ void initialize()
 // dt - time elapsed since the previous update (in seconds)
 void act(float dt)
 {
+    data_time data_time{ global_time, dt };
     global_time += dt;
 
     if (is_key_pressed(VK_ESCAPE))
@@ -72,9 +77,9 @@ void act(float dt)
 
     for (size_t i = 0; i < object_pull.size(); i++)
     {
-        object_pull[i]->act(global_time, dt);
+        object_pull[i]->act(data_time);
     }
-    m3.act(global_time, dt);
+    m3.act(data_time);
 
     
 }
