@@ -7,6 +7,7 @@
 
 namespace spr {
     struct sprite {
+        // NOTE: have no time to finish sprite structure, used only to store font values
         unsigned int width, height;
         unsigned int spr_width, spr_height;
         std::vector<std::vector<unsigned int>> pixels;
