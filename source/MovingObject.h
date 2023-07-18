@@ -18,5 +18,7 @@ public:
 
     const tfm::transform get_transform_dt();
     void set_transform_dt(tfm::transform);
+
+    moving_object() = default;
 };
 

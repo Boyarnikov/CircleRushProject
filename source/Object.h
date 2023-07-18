@@ -8,12 +8,12 @@
 class object
 {
 protected:
-	bool active;
 	double creation_time;
 	tfm::transform obj_transform;
-	Tags tag;
 	void debug_draw(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH]);
 public:
+	Tags tag;
+	bool active = true;
 	object(data_time);
 	object(data_time, tfm::transform);
 	object(data_time, Tags);

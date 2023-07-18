@@ -7,6 +7,9 @@
 #include "PlayerControl.h"
 #include "Object.h"
 #include "TimeManager.h"
+#include "EnemyCubes.h"
+#include "TargetCubes.h"
+#include "HealthBonus.h"
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
@@ -19,9 +22,94 @@ using namespace draw_manager;
 data_time data_t;
 int dt_count = 1;
 
+player_object* player;
 
 std::vector<std::unique_ptr<object>> object_pull;
 
+
+int random(int low, int high) {
+    return low + rand() % (high - low + 1);
+}
+
+
+std::pair<tfm::transform, tfm::transform> generate_movement(double speed) {
+    std::pair<tfm::transform, tfm::transform> movement;
+
+    double direction = double(random(0, 360)) / 2 / M_PI;
+    double distance_from_center = 700;
+
+    movement.first.position = {
+        double(SCREEN_WIDTH / 2 + random(-100., 100.) + cos(direction) * distance_from_center),
+        double(SCREEN_HEIGHT / 2  + random(-100., 100.) + sin(direction) * distance_from_center)
+    };
+    movement.first.scale = 1;
+    movement.second.position = { -speed * cos(direction), -speed * sin(direction) };
+    movement.second.rotation = double(random(5, 10)) / 5;
+    return movement;
+}
+
+double distance_sqr(double x1, double  y1, double  x2, double  y2) {
+    return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+}
+
+
+double distance_sqr(tfm::point a, tfm::point b) {
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+
+
+struct item_generator {
+    double last_enemy_generated;
+    double timed_enemy = 3.3;
+
+    double last_target_generated;
+    double timed_target = 7;
+
+    double last_health_generated;
+    double timed_health = 25;
+
+    void generate_enemy_cube(data_time data_t) {
+        std::pair<tfm::transform, tfm::transform> movement = generate_movement(10. * player->get_level() + random(100, 200));
+        object_pull.push_back(
+            std::unique_ptr<object>(new enemy_cube(data_t, movement.first, movement.second))
+        );
+    }
+
+    void generate_target_cube(data_time data_t) {
+        std::pair<tfm::transform, tfm::transform> movement = generate_movement(10. * player->get_level() + random(100, 200));
+        object_pull.push_back(
+            std::unique_ptr<object>(new target_cube(data_t, movement.first, movement.second))
+        );
+    }
+
+
+    void generate_health(data_time data_t) {
+        std::pair<tfm::transform, tfm::transform> movement = generate_movement(10. * player->get_level() + random(100, 200));
+        object_pull.push_back(
+            std::unique_ptr<object>(new health_bonus(data_t, movement.first, movement.second))
+        );
+    }
+
+
+    void act(data_time) {
+        if (data_t.time - last_enemy_generated > timed_enemy) {
+            generate_enemy_cube(data_t);
+            last_enemy_generated = data_t.time;
+        }
+
+        if (data_t.time - last_target_generated > timed_target) {
+            generate_target_cube(data_t);
+            last_target_generated = data_t.time;
+        }
+
+        if (data_t.time - last_health_generated > timed_health) {
+            generate_health(data_t);
+            last_health_generated = data_t.time;
+        }
+    }
+};
+
+item_generator ig;
 
 // initialize game data in this function
 void initialize()
@@ -35,34 +123,23 @@ void initialize()
             new player_object(data_t, tfm::transform(tfm::point(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)))
         )
     );
-    
-    object_pull.push_back(
-        std::unique_ptr<object>(new moving_object(data_t,
-            tfm::transform(tfm::point(200, 300), 0.),
-            tfm::transform(tfm::point(50, 0), 1.)))
-    );
 
-    moving_object(data_t,
-        tfm::transform(tfm::point(100, 300), 0.),
-        tfm::transform(tfm::point(50, 0), 3.));
-    
-    object_pull.push_back(
-        std::unique_ptr<object>(
-            new moving_object(data_t,
-            tfm::transform(tfm::point(100, 300), 0.),
-            tfm::transform(tfm::point(50, 0), 3.))
-            
-        )
-    );
-    object_pull.push_back(
-        std::unique_ptr<object>(
-            new object(data_t,
-                tfm::transform(
-                    tfm::point(100, 200),
-                    100)
-            )
-        )
-    );
+    player = (player_object*)object_pull[0].get();
+}
+
+
+void clear_unactive() {
+    auto it = object_pull.begin();
+    while (it != object_pull.end())
+    {
+        if (!(it->get()->active))
+        {
+            it = object_pull.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
 }
 
 
@@ -81,6 +158,27 @@ void act(float dt)
     {
         object_pull[i]->act(data_t);
     }
+
+    for (size_t j = 0; j < 2; j++)
+    for (size_t i = 0; i < object_pull.size(); i++)
+    {
+        if (distance_sqr(object_pull[i]->get_transform().position, player->get_ball_transform(j).position) < 1000) {
+            if (object_pull[i]->tag == Tags::Enemy) {
+                player->add_hp(-1);
+            }
+            if (object_pull[i]->tag == Tags::Bonus) {
+                player->add_hp(1);
+            }
+            if (object_pull[i]->tag == Tags::Target) {
+                player->add_score(1);
+            }
+            object_pull[i]->active = false;
+        }
+    }
+
+    ig.act(data_t);
+
+    clear_unactive();
 }
 
 void draw_test_scene() {
@@ -147,7 +245,15 @@ void draw()
 
     if (is_key_pressed('W')) {
         draw_int(buffer, 100, 100, int(1. / (data_t.time / dt_count)), Colors::defoult);
+        draw_int(buffer, 100, 200, int(object_pull.size()), Colors::defoult);
+
+        draw_circle(buffer, int(player->get_ball_transform(0).position.x),
+            int(player->get_ball_transform(0).position.y), 30, Colors::defoult);
+        draw_circle(buffer, int(player->get_ball_transform(1).position.x),
+            int(player->get_ball_transform(1).position.y), 30, Colors::defoult);
     }
+
+
     
 }
 

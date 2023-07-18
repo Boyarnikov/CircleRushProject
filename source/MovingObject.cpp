@@ -17,6 +17,10 @@ void moving_object::act(data_time data_time) {
 	obj_transform.position.y += data_time.dt * transform_dt.position.y;
 	obj_transform.rotation += data_time.dt * transform_dt.rotation;
 	obj_transform.scale += data_time.dt * transform_dt.scale;
+	if (obj_transform.position.x < -SCREEN_WIDTH || obj_transform.position.x > 2 * SCREEN_WIDTH ||
+		obj_transform.position.y < -SCREEN_HEIGHT || obj_transform.position.y > 2 * SCREEN_HEIGHT) {
+		active = false;
+	}
 }
 
 
