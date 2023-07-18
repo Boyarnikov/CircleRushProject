@@ -9,10 +9,14 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 
 namespace draw_manager {
     double eps = 0.0001;
+    
+    pixel::pixel(int x, int y) : x(x), y(y) {};
+    pixel::pixel() : x(0), y(0) {};
 
     color::color(unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255)
         : r(r), g(g), b(b), a(a) {};
@@ -21,6 +25,7 @@ namespace draw_manager {
     color Colors::bgc = color(100, 164, 225, 255);
     color Colors::dark = color(80, 124, 180, 255);
     color Colors::green = color(100, 225, 164, 255);
+    color Colors::green_fade = color(100, 225, 164, 0);
     color Colors::blue = color(100, 225, 225, 255);
     color Colors::white = color(150, 225, 225, 255);
     color Colors::defoult = color(225, 0, 0, 255);
@@ -81,20 +86,30 @@ namespace draw_manager {
         return c;
     }
 
-    // set pixel on the buffer to the chosen color
-    void set_pixel_color(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
+    // set pixel on the buffer to the chosen color. forces it on top of existing colors
+    void set_pixel_color_forced(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
         color c = Colors::defoult) {
         uint32_t pixel_color = uint32_from_color(c);
 
         if (y >= 0 && x >= 0 && y < SCREEN_HEIGHT && x < SCREEN_WIDTH) {
-            if (c.a == 255) {
-                buffer[y][x] = pixel_color;
-            } 
-            else {
-                color new_color = add_colors(color_from_uint32(buffer[y][x]), c);
-                new_color.a = 255;
-                buffer[y][x] = uint32_from_color(new_color);
-            }
+            buffer[y][x] = pixel_color;
+        }
+    }
+
+    // set pixel on the buffer to the chosen color
+    void set_pixel_color(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y,
+        color c = Colors::defoult) {
+        if (c.a > 250) {
+            set_pixel_color_forced(buffer, x, y, c);
+            return;
+        }
+        
+        uint32_t pixel_color = uint32_from_color(c);
+
+        if (y >= 0 && x >= 0 && y < SCREEN_HEIGHT && x < SCREEN_WIDTH) {
+            color new_color = add_colors(color_from_uint32(buffer[y][x]), c);
+            new_color.a = 255;
+            buffer[y][x] = uint32_from_color(new_color);
         }  
     }
 
@@ -122,15 +137,11 @@ namespace draw_manager {
 
     // NOTE: it really looks like this kind of function could benefit from batch-filling the values instead of filling it pixel by pixel
     //       however it feels like alpha channel cannot be optimised taht way. Maybe create a function just to fill background?
-    // fill whole buffer with plane color
+    // NOTE: changing set_pixel_color to set_pixel_color_forced improves fps to flat +20, witch is just kinda sad. 
+    // NOTE: ok, in hindsight its really obvious that to fill background with one color we should just assign the value
+    // fill whole buffer with plane color 
     void fill_with_color(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], color color = Colors::defoult) {
-        for (size_t y = 0; y < SCREEN_HEIGHT; y++)
-        {
-            for (size_t x = 0; x < SCREEN_WIDTH; x++)
-            {
-                set_pixel_color(buffer, x, y, color);
-            }
-        }
+        std::fill_n(*buffer, SCREEN_HEIGHT * SCREEN_WIDTH, uint32_from_color(color));
     }
 
     // fill rectangle from pixel a to pixel b
@@ -281,17 +292,15 @@ namespace draw_manager {
         draw_line(buffer, points[point_coint - 1], points[0], color);
     }
 
-    // sprite structure
-    // TODO: create a sptite structure
-    typedef struct bitmap
-    {
-        unsigned int width, height;
-        unsigned char* pixels;
-    };
 
+    spr::sprite font = spr::sprite();
+
+    void init_font() {
+        font = spr::sprite("numbers.bmp", 64, 64);
+    }
 
     // draws number on screen. uses sprite as mask, and draw color where the mask is full white
-    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font,
+    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH],
         int x, int y, int n, color color) {
         if (n < 0 || n > 9) return;
         int dx = n * font.spr_width;
@@ -305,14 +314,17 @@ namespace draw_manager {
                 unsigned char* point = (unsigned char*)&p;
                 //set_pixel_color(buffer, i + x - 32, j + y - 32, get_color_from_RGBA(point[0] == 255, point[1] == 255, point[2] == 255, point[3] == 255));
                 if (!(point[0] == 255 && point[1] == 255 && point[2] == 255))
-                    set_pixel_color(buffer, i + x - font.spr_width / 2., j + y - font.spr_height / 2., color = Colors::defoult);
+                    set_pixel_color(buffer, i + x - font.spr_width / 2., j + y - font.spr_height / 2., color);
             }
         }
     }
 
     // draws positive integer on screen, scale value gives padding between numbers
-    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font,
-        int x, int y, int n, double scale = 0.67, color color = Colors::defoult) {
+    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH],
+        int x, int y, int n, color color = Colors::defoult) {
+        if (font.height == 0 || font.width == 0) return;
+
+        double scale = 1.4;
         int num_size = 0;
         int num = n;
 
@@ -327,11 +339,9 @@ namespace draw_manager {
         num = n;
         for (size_t i = 0; i < num_size; i++)
         {
-            // NOTE probably should make a sprite-mask function and just draw a sprite frame
-            draw_number(buffer, font,
-                x + (num_size - 1) * font.spr_width * scale / 2. - i * font.spr_width * scale / 2.,
-                y - font.spr_height / 2.,
-                num % 10, color);
+            // NOTE: probably should make a sprite-mask function and just draw a sprite frame
+            draw_number(buffer, x + ((num_size - 1) * font.spr_width * scale / 2. - double(i * font.spr_width * scale)) / 2.0,
+                y - font.spr_height / 2., num % 10, color);
             num /= 10;
         }
     }

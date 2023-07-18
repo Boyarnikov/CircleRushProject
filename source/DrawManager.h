@@ -2,10 +2,16 @@
 #include "Engine.h"
 #include "SpriteManager.h"
 
+// provides a framework to draw primitives on the boofer. 
+// contains pixel drawing, drawing with alpha and primitives
+// can be expanded to have "materials" rather then just colors, but i have no time to implemente it till deadline :)) 
+
 namespace draw_manager {
     struct pixel {
         int x = 0;
         int y = 0;
+        pixel(int, int);
+        pixel();
     };
 
     // color class with RGBA
@@ -24,6 +30,7 @@ namespace draw_manager {
         static color bgc;
         static color dark;
         static color green;
+        static color green_fade;
         static color blue;
         static color white;
         static color defoult;
@@ -46,6 +53,8 @@ namespace draw_manager {
     void draw_circle_segment(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y, int r, double from, double to, color);
     void draw_circle_segment(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel, int r, double from, double to, color);
     void draw_polygon(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], pixel*, int, color);
-    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font, int x, int y, int n, color);
-    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], spr::sprite font, int x, int y, int n, double scale, color);
+
+    void init_font();
+    void draw_number(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH],int x, int y, int n, color);
+    void draw_int(uint32_t buffer[SCREEN_HEIGHT][SCREEN_WIDTH], int x, int y, int n, color);
 }
