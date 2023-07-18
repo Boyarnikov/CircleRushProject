@@ -10,6 +10,7 @@
 #include "EnemyCubes.h"
 #include "TargetCubes.h"
 #include "HealthBonus.h"
+#include "ParticleManager.h"
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
@@ -32,22 +33,6 @@ int random(int low, int high) {
 }
 
 
-std::pair<tfm::transform, tfm::transform> generate_movement(double speed) {
-    std::pair<tfm::transform, tfm::transform> movement;
-
-    double direction = double(random(0, 360)) / 2 / M_PI;
-    double distance_from_center = 700;
-
-    movement.first.position = {
-        double(SCREEN_WIDTH / 2 + random(-100., 100.) + cos(direction) * distance_from_center),
-        double(SCREEN_HEIGHT / 2  + random(-100., 100.) + sin(direction) * distance_from_center)
-    };
-    movement.first.scale = 1;
-    movement.second.position = { -speed * cos(direction), -speed * sin(direction) };
-    movement.second.rotation = double(random(5, 10)) / 5;
-    return movement;
-}
-
 double distance_sqr(double x1, double  y1, double  x2, double  y2) {
     return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
 }
@@ -57,7 +42,7 @@ double distance_sqr(tfm::point a, tfm::point b) {
     return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 }
 
-
+// structure that generates different items 
 struct item_generator {
     double last_enemy_generated;
     double timed_enemy = 3.3;
@@ -67,6 +52,23 @@ struct item_generator {
 
     double last_health_generated;
     double timed_health = 25;
+
+
+    std::pair<tfm::transform, tfm::transform> generate_movement(double speed) {
+        std::pair<tfm::transform, tfm::transform> movement;
+
+        double direction = double(random(0, 360)) / 2 / M_PI;
+        double distance_from_center = 700;
+
+        movement.first.position = {
+            double(SCREEN_WIDTH / 2 + random(-100., 100.) + cos(direction) * distance_from_center),
+            double(SCREEN_HEIGHT / 2 + random(-100., 100.) + sin(direction) * distance_from_center)
+        };
+        movement.first.scale = 1;
+        movement.second.position = { -speed * cos(direction), -speed * sin(direction) };
+        movement.second.rotation = double(random(5, 10)) / 5;
+        return movement;
+    }
 
     void generate_enemy_cube(data_time data_t) {
         std::pair<tfm::transform, tfm::transform> movement = generate_movement(10. * player->get_level() + random(100, 200));
@@ -115,6 +117,7 @@ item_generator ig;
 void initialize()
 {
     init_font();
+    init_particle_manager();
 
     data_t = { 0, 0 };
 
@@ -253,8 +256,9 @@ void draw()
             int(player->get_ball_transform(1).position.y), 30, Colors::defoult);
     }
 
+    draw_particles(buffer, data_t);
 
-    
+
 }
 
 

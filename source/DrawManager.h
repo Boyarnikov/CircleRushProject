@@ -2,6 +2,10 @@
 #include "Engine.h"
 #include "SpriteManager.h"
 
+// provides a framework to draw primitives on the boofer. 
+// contains pixel drawing, drawing with alpha and primitives
+// can be expanded to have "materials" rather then just colors, but i have no time to implemente it till deadline :)) 
+
 namespace draw_manager {
     struct pixel {
         int x = 0;
@@ -26,6 +30,7 @@ namespace draw_manager {
         static color bgc;
         static color dark;
         static color green;
+        static color green_fade;
         static color blue;
         static color white;
         static color defoult;

@@ -4,7 +4,7 @@
 #include "Engine.h"
 #include "Tags.h"
 
-// represents game object with transform that can be called to draw and act
+// represents gameobject with transform that can be called to draw and act
 class object
 {
 protected:

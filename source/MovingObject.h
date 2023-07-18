@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "TimeManager.h"
 
+// gameobject that follows straight path using second transform
 class moving_object :
     public object
 {

@@ -25,6 +25,7 @@ namespace draw_manager {
     color Colors::bgc = color(100, 164, 225, 255);
     color Colors::dark = color(80, 124, 180, 255);
     color Colors::green = color(100, 225, 164, 255);
+    color Colors::green_fade = color(100, 225, 164, 0);
     color Colors::blue = color(100, 225, 225, 255);
     color Colors::white = color(150, 225, 225, 255);
     color Colors::defoult = color(225, 0, 0, 255);

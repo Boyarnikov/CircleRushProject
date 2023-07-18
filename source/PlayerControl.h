@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "ContinuousValue.h"
 
+// gameobject that implements player object for game
 class player_object :
     public object
 {

@@ -1,5 +1,6 @@
 #pragma once
 #include "MovingObject.h"
+// high-end gameobject that follows straight path and revards player with score if touched
 class target_cube :
     public moving_object
 {

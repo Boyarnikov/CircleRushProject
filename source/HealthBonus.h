@@ -1,5 +1,6 @@
 #pragma once
 #include "MovingObject.h"
+// high-end gameobject that follows straight path and heals player if touched
 class health_bonus :
     public moving_object
 {

@@ -1,5 +1,7 @@
 #pragma once
 #include "MovingObject.h"
+
+// high-end gameobject that follows straight path and damage player if touched
 class enemy_cube :
     public moving_object
 {

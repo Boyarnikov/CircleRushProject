@@ -148,6 +148,7 @@
     <ClInclude Include="HealthBonus.h" />
     <ClInclude Include="MovingObject.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ParticleManager.h" />
     <ClInclude Include="PlayerControl.h" />
     <ClInclude Include="SpriteManager.h" />
     <ClInclude Include="DrawManager.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="HealthBonus.cpp" />
     <ClCompile Include="MovingObject.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ParticleManager.cpp" />
     <ClCompile Include="PlayerControl.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="DrawManager.cpp" />
