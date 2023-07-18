@@ -12,6 +12,7 @@
 #include "HealthBonus.h"
 #include "ParticleManager.h"
 #include <stdlib.h>
+#include <alg.h>
 #include <memory.h>
 #include <math.h>
 #include <vector>
@@ -51,7 +52,7 @@ struct item_generator {
     double timed_target = 7;
 
     double last_health_generated;
-    double timed_health = 25;
+    double timed_health = 60;
 
 
     std::pair<tfm::transform, tfm::transform> generate_movement(double speed) {
@@ -70,12 +71,14 @@ struct item_generator {
         return movement;
     }
 
+    
     void generate_enemy_cube(data_time data_t) {
         std::pair<tfm::transform, tfm::transform> movement = generate_movement(10. * player->get_level() + random(100, 200));
         object_pull.push_back(
             std::unique_ptr<object>(new enemy_cube(data_t, movement.first, movement.second))
         );
     }
+
 
     void generate_target_cube(data_time data_t) {
         std::pair<tfm::transform, tfm::transform> movement = generate_movement(10. * player->get_level() + random(100, 200));
@@ -94,12 +97,12 @@ struct item_generator {
 
 
     void act(data_time) {
-        if (data_t.time - last_enemy_generated > timed_enemy) {
+        if (data_t.time - last_enemy_generated > timed_enemy - min(timed_enemy/3, player->get_level() * 0.3)) {
             generate_enemy_cube(data_t);
             last_enemy_generated = data_t.time;
         }
 
-        if (data_t.time - last_target_generated > timed_target) {
+        if (data_t.time - last_target_generated > timed_target - min(timed_target / 3, player->get_level() * 0.3)) {
             generate_target_cube(data_t);
             last_target_generated = data_t.time;
         }
